@@ -1,0 +1,20 @@
+{
+  "name": "enhanced-fetch",
+  "version": "1.0.0",
+  "description": "🐕 Opinionated wrapper to the browser's default fetch method.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joemccann/enhanced-fetch.git"
+  },
+  "keywords": [],
+  "author": "Joe McCann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joemccann/enhanced-fetch/issues"
+  },
+  "homepage": "https://github.com/joemccann/enhanced-fetch#readme",
+  "dependencies": {
+    "debug": "^4.1.0"
+  }
+}
