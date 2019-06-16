@@ -1,6 +1,6 @@
 const path = require('path')
 const qs = require('querystring')
-const debug = require('debug')('fetch')
+const debug = require('debug')('enhanced-fetch')
 
 class EnhancedFetch {
   constructor (opts = {}) {
@@ -36,6 +36,9 @@ class EnhancedFetch {
       }
     }
 
+    debug(`request`)
+    debug(request)
+
     const routename = this.root + path.join('/', url)
 
     let route = routename + this._parseBody(opts)
@@ -49,42 +52,50 @@ class EnhancedFetch {
     }
 
     if (opts.body && opts.method === 'POST') {
+      debug(`stringifying body for POST`)
       opts.body = JSON.stringify(opts.body)
     }
 
-    if (opts.body && opts.method !== 'POST') {
+    if (opts.body && opts.method == 'GET') {
+      debug(`deleting body for GET`)
       delete request.body
     }
 
     let response = null
 
+    debug(`route`, route)
+    debug(`request transformed:`)
+    debug(request)
+
     try {
       response = await window.fetch(route, request)
     } catch (err) {
+      debug(`response err`)
+      debug(response)
+      debug(err)
       return { err, response: {} }
     }
 
     response.statusCode = response.status
+
+    debug(response.statusCode)
+    debug(`response.statusCode`)
 
     let data = {}
 
     if (response.headers.get('Content-Length') || (opts.method !== 'DELETE')) {
       try {
         data = await response.json()
-        try {
-          data = JSON.parse(data.body)
-        } catch (err) {
-          return { err, response: {} }
-        }
         debug(`Response from ${route}:`, data || '')
       } catch (err) {
         return { err, response: {} }
       }
     }
 
+
     if (!response.ok || response.statusCode >= 300 || response.statusCode < 200) {
       const err = response.statusText || response.message || data.message
-      return { data, err, response }
+      return { err, response }
     }
 
     return { data, response }
