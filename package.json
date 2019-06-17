@@ -1,6 +1,6 @@
 {
   "name": "enhanced-fetch",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "🐕 Opinionated wrapper to the browser's default fetch method.",
   "main": "index.js",
   "repository": {
