@@ -27,6 +27,8 @@ class EnhancedFetch {
       return { err: `No network connection detected; unable to fetch ${url}` }
     }
 
+    // debug(`opts`, opts)
+
     const request = {
       response: true,
       body: opts && opts.body,
@@ -36,27 +38,25 @@ class EnhancedFetch {
       }
     }
 
-    debug(`request`)
-    debug(request)
-
-    const routename = this.root + path.join('/', url)
-
-    let route = routename + this._parseBody(opts)
-
-    if (opts.method) {
-      opts.method = opts.method.toUpperCase()
-    }
-
     if (opts.headers) {
       request.headers = Object.assign({}, request.headers, opts.headers)
     }
 
-    if (opts.body && opts.method === 'POST') {
+    // debug(`request`)
+    // debug(request)
+
+    const routename = this.root + path.join('/', url)
+
+    let route = routename + this._parseBody(request)
+
+    request.method = request.method.toUpperCase()
+
+    if (request.body && request.method === 'POST') {
       debug(`stringifying body for POST`)
-      opts.body = JSON.stringify(opts.body)
+      request.body = JSON.stringify(request.body)
     }
 
-    if (opts.body && opts.method == 'GET') {
+    if (request.body && request.method == 'GET') {
       debug(`deleting body for GET`)
       delete request.body
     }
@@ -64,38 +64,33 @@ class EnhancedFetch {
     let response = null
 
     debug(`route`, route)
-    debug(`request transformed:`)
-    debug(request)
+    // debug(`request transformed:`)
+    // debug(request)
 
     try {
       response = await window.fetch(route, request)
     } catch (err) {
-      debug(`response err`)
-      debug(response)
-      debug(err)
       return { err, response: {} }
     }
 
     response.statusCode = response.status
 
-    debug(response.statusCode)
-    debug(`response.statusCode`)
+    debug(`response.statusCode`, response.statusCode)
 
     let data = {}
 
-    if (response.headers.get('Content-Length') || (opts.method !== 'DELETE')) {
+    if (!response.ok || response.statusCode >= 300 || response.statusCode < 200) {
+      const err = response.statusText || response.message || data.message
+      return { err, response }
+    }
+
+    if (response.headers.get('Content-Length') || (request.method !== 'DELETE')) {
       try {
         data = await response.json()
         debug(`Response from ${route}:`, data || '')
       } catch (err) {
         return { err, response: {} }
       }
-    }
-
-
-    if (!response.ok || response.statusCode >= 300 || response.statusCode < 200) {
-      const err = response.statusText || response.message || data.message
-      return { err, response }
     }
 
     return { data, response }
