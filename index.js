@@ -52,18 +52,18 @@ class EnhancedFetch {
     request.method = request.method.toUpperCase()
 
     if (request.body && request.method === 'POST') {
-      debug(`stringifying body for POST`)
+      // debug(`stringifying body for POST`)
       request.body = JSON.stringify(request.body)
     }
 
     if (request.body && request.method == 'GET') {
-      debug(`deleting body for GET`)
+      // debug(`deleting body for GET`)
       delete request.body
     }
 
     let response = null
 
-    debug(`route`, route)
+    // debug(`route`, route)
     // debug(`request transformed:`)
     // debug(request)
 
@@ -75,19 +75,26 @@ class EnhancedFetch {
 
     response.statusCode = response.status
 
-    debug(`response.statusCode`, response.statusCode)
+    // debug(`response.statusCode`, response.statusCode)
 
     let data = {}
 
     if (!response.ok || response.statusCode >= 300 || response.statusCode < 200) {
-      const err = response.statusText || response.message || data.message
+      let err
+      try {
+        err = await response.json()
+      } catch (error) {
+        return { err: error, response }
+      }
+
+      err = response.statusText || response.message || data.message
       return { err, response }
     }
 
     if (response.headers.get('Content-Length') || (request.method !== 'DELETE')) {
       try {
         data = await response.json()
-        debug(`Response from ${route}:`, data || '')
+        // debug(`Response from ${route}:`, data || '')
       } catch (err) {
         return { err, response: {} }
       }
